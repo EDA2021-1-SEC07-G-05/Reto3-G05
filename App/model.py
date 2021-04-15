@@ -41,6 +41,9 @@ los mismos.
 
 # Funciones para agregar informacion al catalogo
 
+def addTracks():
+    return None
+
 # Funciones para creacion de datos
 
 # Funciones de consulta
