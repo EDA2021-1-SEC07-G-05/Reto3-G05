@@ -48,6 +48,9 @@ def loadData(analyzer):
     tracksfile = cf.data_dir + 'context_content_features-small.csv'
     input_file = csv.DictReader(open(tracksfile, encoding="utf-8"),
                                 delimiter=",")
+    caract = dict.keys(input_file)[0:9]
+    for char in caract:
+        model.addCaracAsKey(analyzer, char)
     for track in input_file:
         model.addTracks(analyzer, track)
     return analyzer

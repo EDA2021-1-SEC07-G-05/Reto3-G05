@@ -30,6 +30,7 @@ from DISClib.ADT import list as lt
 from DISClib.ADT import map as mp
 from DISClib.DataStructures import mapentry as me
 from DISClib.Algorithms.Sorting import shellsort as sa
+from DISClib.ADT import orderedmap as om
 assert cf
 
 """
@@ -50,6 +51,7 @@ def newAnalyzer():
     Retorna el analizador inicializado.
     """
     analyzer = {'tracks': None,
+                'EvByCaracteristics' : mp.newMap(numelements= 6, maptype= 'PROBING', loadfactor= 0.3, comparefunction= cmpByCarac)
                 }
 
     analyzer['tracks'] = lt.newList('SINGLE_LINKED', compareIds)
@@ -60,7 +62,32 @@ def newAnalyzer():
 
 def addTracks(analyzer, track):
     lt.addLast(analyzer['tracks'], track)
-    return analyzer
+    return None
+
+def addCaracAsKey(analyzer, char):
+    """
+    Se añade cada característica del track como llave de un mapa y se inicializa un RBT por cada llave
+    """
+    nuevo_arbol = om.newMap(omaptype= 'RBT', comparefunction= cmpByRate)
+    mp.put(analyzer['EvByCaracteristics'], char, nuevo_arbol)
+    return None
+
+
+def addTracksByCarac(analyzer, track):
+    mapa = analyzer['EvByCaracteristics']
+    keys = mp.keySet(mapa)
+    for char in lt.iterator(keys):
+        entry_1 = mp.get(mapa, char)
+        arbol_RBT = me.getValue(entry)
+        if om.contains(mapa, track[char]):
+            entry_2 = om.get(mapa, track[char])
+            lista = me.getValue(entry_2)
+            lt.addFirst(lista, track)
+            om.put(mapa, track[char], key)
+        else:
+            lista = lt.newList('SINGLE_LINKED', cmpfunction= compareIds)
+            om.put(mapa. track[char], lista)
+    return None
 
 # Funciones para creacion de datos
 
@@ -79,5 +106,22 @@ def compareIds(id1, id2):
     else:
         return -1
 
+def cmpByCarac(keyname, entry):
+    key = me.getKey(entry)
+    if keyname > key:
+        return 1
+    elif keyname < key:
+        return -1
+    else:
+        return 0
+
+def cmpByRate(keyname, entry):
+    key = me.getKey(entry)
+    if keyname > key:
+        return 1
+    elif keyname < key:
+        return -1
+    else:
+        return 0
 # Funciones de ordenamiento
 
