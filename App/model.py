@@ -39,15 +39,44 @@ los mismos.
 
 # Construccion de modelos
 
+def newAnalyzer():
+
+    """ Inicializa el analizador
+
+    Crea una lista vacia para guardar todos los crimenes
+    Se crean indices (Maps) por los siguientes criterios:
+    -Fechas
+
+    Retorna el analizador inicializado.
+    """
+    analyzer = {'tracks': None,
+                }
+
+    analyzer['tracks'] = lt.newList('SINGLE_LINKED', compareIds)
+    
+    return analyzer
+
 # Funciones para agregar informacion al catalogo
 
-def addTracks():
-    return None
+def addTracks(analyzer, track):
+    lt.addLast(analyzer['tracks'], track)
+    return analyzer
 
 # Funciones para creacion de datos
 
 # Funciones de consulta
 
 # Funciones utilizadas para comparar elementos dentro de una lista
+
+def compareIds(id1, id2):
+    """
+    Compara dos id de cada pista
+    """
+    if (id1 == id2):
+        return 0
+    elif id1 > id2:
+        return 1
+    else:
+        return -1
 
 # Funciones de ordenamiento

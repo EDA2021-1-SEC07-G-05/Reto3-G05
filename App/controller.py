@@ -41,11 +41,11 @@ def init():
 
 # Funciones para la carga de datos
 
-def loadData(analyzer, file):
+def loadData(analyzer):
     """
     Carga los datos de los archivos CSV en el modelo
     """
-    tracksfile = cf.data_dir + tracksfile
+    tracksfile = cf.data_dir + 'context_content_features-small.csv'
     input_file = csv.DictReader(open(tracksfile, encoding="utf-8"),
                                 delimiter=",")
     for track in input_file:
