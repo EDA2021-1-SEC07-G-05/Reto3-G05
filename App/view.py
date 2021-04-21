@@ -41,6 +41,13 @@ def printMenu():
 
 catalog = None
 
+def init():
+    return controller.init()
+
+def execute_loadData (catalog): 
+    answer = controller.loadData(catalog)
+    return answer
+
 """
 Menu principal
 """
@@ -49,6 +56,9 @@ while True:
     inputs = input('Seleccione una opción para continuar\n')
     if int(inputs[0]) == 1:
         print("Cargando información de los archivos ....")
+        catalog = init()
+        answer = execute_loadData(catalog)
+        print("Registros de eventos de escucha cargados: " + str(lt.size(catalog['tracks'])))
 
     elif int(inputs[0]) == 2:
         pass
