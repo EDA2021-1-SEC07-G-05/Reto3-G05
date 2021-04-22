@@ -59,3 +59,7 @@ def loadData(analyzer):
 # Funciones de ordenamiento
 
 # Funciones de consulta sobre el catálogo
+
+def mediar_consulta_propiedades(analyzer):
+    return model.consulta_propiedades(analyzer)
+

@@ -51,10 +51,11 @@ def newAnalyzer():
     Retorna el analizador inicializado.
     """
     analyzer = {'tracks': None,
-                'EvByCaracteristics' : mp.newMap(numelements= 6, maptype= 'PROBING', loadfactor= 0.3, comparefunction= cmpByCarac)
+                'EvByCaracteristics' : None
                 }
 
     analyzer['tracks'] = lt.newList('SINGLE_LINKED', compareIds)
+    analyzer['EvByCaracteristics'] = mp.newMap(numelements= 6, maptype= 'PROBING', loadfactor= 0.3, comparefunction= cmpByCarac)
     
     return analyzer
 
@@ -93,6 +94,18 @@ def addTracksByCarac(analyzer, track):
 # Funciones para creacion de datos
 
 # Funciones de consulta
+def consulta_propiedades(analyzer):
+    mapa = analyzer['EvByCaracteristics']
+    keys = mp.keySet(mapa)
+    propiedades = lt.newList('SINGLE_LINKED')
+    for i in lt.iterator(keys):
+        entry = mp.get(mapa, i)
+        arbol = me.getValue(entry)
+        altura = om.height(arbol)
+        elementos = om.size(arbol)
+        lt.addFirst(propiedades, (altura,elementos))
+    return propiedades
+
 
 # Funciones utilizadas para comparar elementos dentro de una lista
 

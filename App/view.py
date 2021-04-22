@@ -36,17 +36,27 @@ operación solicitada
 
 def printMenu():
     print("Bienvenido")
-    print("1- Cargar información en el catálogo")
-    print("2- ")
+    print("1- Inicializar analyzer")
+    print("2- Cargar información al analyzer")
+    print("3- Obtener propiedades de los árboles usados")
+    print("0- Salir")
 
 catalog = None
 
 def init():
     return controller.init()
 
-def execute_loadData (catalog): 
+def execute_loadData(catalog): 
     answer = controller.loadData(catalog)
     return answer
+
+def execute_consulta_propiedades(catalog):
+    return controller.mediar_consulta_propiedades(catalog)
+
+def view_propiedades(tuple):
+    altura = tuple[0]
+    elementos = tuple[1]
+    return altura, elementos
 
 """
 Menu principal
@@ -54,14 +64,22 @@ Menu principal
 while True:
     printMenu()
     inputs = input('Seleccione una opción para continuar\n')
+
     if int(inputs[0]) == 1:
-        print("Cargando información de los archivos ....")
         catalog = init()
+
+    elif int(inputs[0]) == 2:
+        print("Cargando información de los archivos ....")
         answer = execute_loadData(catalog)
         print("Registros de eventos de escucha cargados: " + str(lt.size(catalog['tracks'])))
 
-    elif int(inputs[0]) == 2:
-        pass
+    elif int(inputs[0]) == 3:
+        result = execute_consulta_propiedades(catalog)
+        contador = 0
+        for i in lt.iterator(result):
+            contador += 1
+            altura, elementos = view_propiedades(i)
+            print(f'\nArbol RBT {contador}:\naltura = {altura}\nelementos = {elementos}')
 
     else:
         sys.exit(0)
