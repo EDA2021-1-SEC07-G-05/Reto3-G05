@@ -78,15 +78,16 @@ def addTracksByCarac(analyzer, track):
     keys = mp.keySet(mapa)
     for char in lt.iterator(keys):
         entry_1 = mp.get(mapa, char)
-        arbol_RBT = me.getValue(entry)
-        if om.contains(mapa, track[char]):
-            entry_2 = om.get(mapa, track[char])
+        arbol_RBT = me.getValue(entry_1)
+        key = float(track[char])
+        entry_2 = om.get(arbol_RBT, key)
+        if entry_2 is not None:
             lista = me.getValue(entry_2)
             lt.addFirst(lista, track)
-            om.put(mapa, track[char], key)
+            om.put(arbol_RBT, key, lista)
         else:
             lista = lt.newList('SINGLE_LINKED', cmpfunction= compareIds)
-            om.put(mapa. track[char], lista)
+            om.put(arbol_RBT, key, lista)
     return None
 
 # Funciones para creacion de datos
@@ -115,11 +116,10 @@ def cmpByCarac(keyname, entry):
     else:
         return 0
 
-def cmpByRate(keyname, entry):
-    key = me.getKey(entry)
-    if keyname > key:
+def cmpByRate(key_1, key_2):
+    if key_1 > key_2:
         return 1
-    elif keyname < key:
+    elif key_1 < key_2:
         return -1
     else:
         return 0
