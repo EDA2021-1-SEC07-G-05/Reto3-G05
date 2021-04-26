@@ -51,18 +51,23 @@ def newAnalyzer():
     Retorna el analizador inicializado.
     """
     analyzer = {'tracks': None,
-                'EvByCaracteristics' : None
+                'EvByCaracteristics' : None,
+                'EvByArtist': None,
+                'EvByPista': None
                 }
 
     analyzer['tracks'] = lt.newList('SINGLE_LINKED', compareIds)
+    analyzer['EvByArtists'] = om.newMap(omaptype= 'RBT', comparefunction= compareIds)
+    analyzer['EvByPista'] = om.newMap(omaptype= 'RBT', comparefunction= compareIds)
     analyzer['EvByCaracteristics'] = mp.newMap(numelements= 6, maptype= 'PROBING', loadfactor= 0.3, comparefunction= cmpByCarac)
-    
     return analyzer
 
 # Funciones para agregar informacion al catalogo
 
 def addTracks(analyzer, track):
     lt.addLast(analyzer['tracks'], track)
+    om.put(analyzer['EvByArtists'], track['artist_id'], track)
+    om.put(analyzer['EvByPista'], track['track_id'], track)
     return None
 
 def addCaracAsKey(analyzer, char):
@@ -105,6 +110,14 @@ def consulta_propiedades(analyzer):
         elementos = om.size(arbol)
         lt.addFirst(propiedades, (altura,elementos))
     return propiedades
+
+def consulta_propiedades_carga(analyzer):
+    artistas = om.size(analyzer['EvByArtists'])
+    pistas = om.size(analyzer['EvByPista'])
+    size_lista = lt.size(analyzer['tracks'])
+    primeros_5 = lt.subList(analyzer['tracks'],1,5)
+    ultimos_5 = lt.subList(analyzer['tracks'],size_lista-4,5)
+    return artistas, pistas, size_lista, primeros_5, ultimos_5
 
 def consulta_req1(analyzer, car, sup, inf):
     map_by_car = analyzer['EvByCaracteristics']

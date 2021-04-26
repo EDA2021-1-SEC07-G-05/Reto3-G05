@@ -54,6 +54,23 @@ def execute_loadData(catalog):
 def execute_consulta_propiedades(catalog):
     return controller.mediar_consulta_propiedades(catalog)
 
+def execute_propiedades_carga(catalog):
+    return controller.comunica_propiedades_carga(catalog)
+
+def view_elementos_lista_carga(lista):
+    contador = 1
+    for evento in lt.iterator(lista):
+        print(f"Eventp número {contador}")
+        print(f"ID del evento: {evento['track_id']}")
+        print(f"Instrumentalidad: {evento['instrumentalness']}")
+        print(f"Acústica: {evento['acousticness']}")
+        print(f"Liveness: {evento['liveness']}")
+        print(f"Speechiness: {evento['speechiness']}")
+        print(f"Energía: {evento['energy']}")
+        print(f"Capacidad de baile: {evento['danceability']}")
+        print(f"Valencia: {evento['valence']}\n")
+        contador += 1
+
 def view_propiedades(tuple):
     altura = tuple[0]
     elementos = tuple[1]
@@ -84,7 +101,14 @@ while True:
     elif int(inputs[0]) == 2:
         print("Cargando información de los archivos ....")
         answer = execute_loadData(catalog)
-        print("Registros de eventos de escucha cargados: " + str(lt.size(catalog['tracks'])))
+        propiedades = execute_propiedades_carga(catalog)
+        print(f"Registros de eventos de escucha cargados: {propiedades[2]}\n")
+        print(f"Resgistros de artistas únicos cargados: {propiedades[0]}\n")
+        print(f"Registros de pistas únicas cargadas: {propiedades[1]}\n")
+        print("Primeros 5 eventos cargados:")
+        view_elementos_lista_carga(propiedades[3])
+        print("Ultimos 5 eventos cargados: ")
+        view_elementos_lista_carga(propiedades[4])
 
     elif int(inputs[0]) == 3:
         car,sup,inf = parametros_req1()

@@ -52,7 +52,10 @@ def loadData(analyzer):
         model.addCaracAsKey(analyzer, char)
     for track in input_file:
         model.addTracks(analyzer, track)
-        model.addTracksByCarac(analyzer, track)
+        #model.addTracksByCarac(analyzer, track)
+        """
+        Por ahora esta opción queda suspendida por tiempo
+        """
     return analyzer
 
 # Funciones de ordenamiento
@@ -61,6 +64,9 @@ def loadData(analyzer):
 
 def mediar_consulta_propiedades(analyzer):
     return model.consulta_propiedades(analyzer)
+
+def comunica_propiedades_carga(catalog):
+    return model.consulta_propiedades_carga(catalog)
 
 def comunica_req1(catalog, car, sup, inf):
     """
