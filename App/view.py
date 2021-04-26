@@ -44,6 +44,8 @@ def printMenu():
 
 catalog = None
 
+#Funciones relacionadas con la carga de datos
+
 def init():
     return controller.init()
 
@@ -60,7 +62,7 @@ def execute_propiedades_carga(catalog):
 def view_elementos_lista_carga(lista):
     contador = 1
     for evento in lt.iterator(lista):
-        print(f"Eventp número {contador}")
+        print(f"Evento número {contador}")
         print(f"ID del evento: {evento['track_id']}")
         print(f"Instrumentalidad: {evento['instrumentalness']}")
         print(f"Acústica: {evento['acousticness']}")
@@ -76,10 +78,15 @@ def view_propiedades(tuple):
     elementos = tuple[1]
     return altura, elementos
 
+#Funciones relacionadas con el requerimiento 1
+
 def parametros_req1():
+    """
+    Pide los parámetros necesarios al usuario
+    """
     car = input('Digite la característica de contenido: ')
-    inf = input('Digite el valor mínimo de la característica: ')
-    sup = input('Digite el valor máximo de la característica: ')
+    inf = float(input('Digite el valor mínimo de la característica: '))
+    sup = float(input('Digite el valor máximo de la característica: '))
     return car,sup,inf
 
 def execute_req1(catalog, car, sup, inf):
@@ -87,6 +94,15 @@ def execute_req1(catalog, car, sup, inf):
     Ejecuta el requerimiento 1
     """
     return controller.comunica_req1(catalog, car, sup, inf)
+
+def view_req_1(result):
+    """
+    Edita el view de los resultados del requerimiento 1
+    """
+    print("RESULTADOS ENCONTRADOS")
+    print(f"Total de eventos de escucha: {result[0]}")
+    print(f"Total de artistas únicos: {result[1]}")
+    return None
 
 """
 Menu principal
@@ -113,7 +129,7 @@ while True:
     elif int(inputs[0]) == 3:
         car,sup,inf = parametros_req1()
         result = execute_req1(catalog, car, sup, inf)
-        print(f'Total de reproducciones = {result}')
+        view_req_1(result)
 
 
     elif int(inputs[0]) == 70:

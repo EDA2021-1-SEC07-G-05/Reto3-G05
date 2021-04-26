@@ -79,26 +79,27 @@ def addCaracAsKey(analyzer, char):
     return None
 
 
-def addTracksByCarac(analyzer, track):
-    mapa = analyzer['EvByCaracteristics']
-    keys = mp.keySet(mapa)
-    for char in lt.iterator(keys):
-        entry_1 = mp.get(mapa, char)
+def addTracksByCarac(analyzer, track, caract):
+    for car in caract:
+        rate = float(track[car])
+        entry_1 = mp.get(analyzer['EvByCaracteristics'], car)
         arbol_RBT = me.getValue(entry_1)
-        key = float(track[char])
-        entry_2 = om.get(arbol_RBT, key)
+        entry_2 = om.get(arbol_RBT, rate)
         if entry_2 is not None:
             lista = me.getValue(entry_2)
-            lt.addFirst(lista, track)
-            om.put(arbol_RBT, key, lista)
+            lt.addLast(lista, track)
+            om.put(arbol_RBT, rate, lista)
         else:
-            lista = lt.newList('SINGLE_LINKED', cmpfunction= compareIds)
-            om.put(arbol_RBT, key, lista)
+            lista = lt.newList(datastructure= 'SINGLED_LINKED',  cmpfunction= compareIds)
+            lt.addLast(lista, track)
+            om.put(arbol_RBT, rate, lista)
     return None
 
 # Funciones para creacion de datos
 
 # Funciones de consulta
+
+    #Apartado de funciones para consulta sobre la carga de datos
 def consulta_propiedades(analyzer):
     mapa = analyzer['EvByCaracteristics']
     keys = mp.keySet(mapa)
@@ -119,13 +120,26 @@ def consulta_propiedades_carga(analyzer):
     ultimos_5 = lt.subList(analyzer['tracks'],size_lista-4,5)
     return artistas, pistas, size_lista, primeros_5, ultimos_5
 
+    #Apartado de funciones para consulta sobre el requerimiento 1
 def consulta_req1(analyzer, car, sup, inf):
-    map_by_car = analyzer['EvByCaracteristics']
-    entry_car = mp.get(map_by_car, car)
-    arbol_RBT = me.getValue(entry_car)
-    x = om.rank(arbol_RBT, sup)
-    y = om.rank(arbol_RBT, inf)
-    return x-y
+    #Número de artistas únicos
+    mapa_caracs = analyzer['EvByCaracteristics']
+    entry_1 = mp.get(mapa_caracs, car)
+    arbol_RBT = me.getValue(entry_1)
+    lista_1 = om.values(arbol_RBT, inf, sup)
+    mapa_trabajo = mp.newMap(numelements= 100, maptype= 'PROBING', loadfactor= 0.3)
+    num_eventos = 0
+    num_artistas = 0
+    for lista in lt.iterator(lista_1):
+        num_eventos += lt.size(lista)
+        for track in lt.iterator(lista):
+            artista = track['artist_id']
+            entry_2 = mp.get(mapa_trabajo, artista)
+            if entry_2 is None:
+                num_artistas += 1
+                mp.put(mapa_trabajo, artista, 1)
+
+    return num_eventos, num_artistas
 
 # Funciones utilizadas para comparar elementos dentro de una lista
 
