@@ -38,7 +38,8 @@ def printMenu():
     print("Bienvenido")
     print("1- Inicializar analyzer")
     print("2- Cargar información al analyzer")
-    print("3- Obtener propiedades de los árboles usados")
+    print("3- Requerimiento 1")
+    print("70- Obtener propiedades de los árboles usados")
     print("0- Salir")
 
 catalog = None
@@ -58,6 +59,18 @@ def view_propiedades(tuple):
     elementos = tuple[1]
     return altura, elementos
 
+def parametros_req1():
+    car = input('Digite la característica de contenido: ')
+    inf = input('Digite el valor mínimo de la característica: ')
+    sup = input('Digite el valor máximo de la característica: ')
+    return car,sup,inf
+
+def execute_req1(catalog, car, sup, inf):
+    """
+    Ejecuta el requerimiento 1
+    """
+    return controller.comunica_req1(catalog, car, sup, inf)
+
 """
 Menu principal
 """
@@ -74,6 +87,12 @@ while True:
         print("Registros de eventos de escucha cargados: " + str(lt.size(catalog['tracks'])))
 
     elif int(inputs[0]) == 3:
+        car,sup,inf = parametros_req1()
+        result = execute_req1(catalog, car, sup, inf)
+        print(f'Total de reproducciones = {result}')
+
+
+    elif int(inputs[0]) == 70:
         result = execute_consulta_propiedades(catalog)
         contador = 0
         for i in lt.iterator(result):

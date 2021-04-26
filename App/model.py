@@ -106,6 +106,13 @@ def consulta_propiedades(analyzer):
         lt.addFirst(propiedades, (altura,elementos))
     return propiedades
 
+def consulta_req1(analyzer, car, sup, inf):
+    map_by_car = analyzer['EvByCaracteristics']
+    entry_car = mp.get(map_by_car, car)
+    arbol_RBT = me.getValue(entry_car)
+    x = om.rank(arbol_RBT, sup)
+    y = om.rank(arbol_RBT, inf)
+    return x-y
 
 # Funciones utilizadas para comparar elementos dentro de una lista
 

@@ -63,3 +63,9 @@ def loadData(analyzer):
 def mediar_consulta_propiedades(analyzer):
     return model.consulta_propiedades(analyzer)
 
+def comunica_req1(catalog, car, sup, inf):
+    """
+    Comunica al model la petición del view del requerimiento 1
+    """
+    return model.consulta_req1(catalog,car,sup,inf)
+
