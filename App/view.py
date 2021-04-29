@@ -39,6 +39,7 @@ def printMenu():
     print("1- Inicializar analyzer")
     print("2- Cargar información al analyzer")
     print("3- Requerimiento 1")
+    print("4- Rquerimiento 2")
     print("70- Obtener propiedades de los árboles usados")
     print("0- Salir")
 
@@ -104,6 +105,23 @@ def view_req_1(result):
     print(f"Total de artistas únicos: {result[1]}")
     return None
 
+#Funciones relacionadas con el requerimiento 2
+def parametros_req2():
+    """
+    Pide al usuario los datos necesarios para realizar el requerimiento 2
+    """
+    inf_energy = input('Digite el valor mínimo de Energy que desea consultar: ')
+    sup_energy = input('Digite el valor máximo de Energy que desea consultar: ')
+    inf_dance = input('Digite el valor mínimo de Danceability que desea consultar: ')
+    sup_dance = input('Digite el valor máximo de Danceability que desea consultar: ')
+    return inf_energy, sup_energy, inf_dance, sup_dance
+
+def execute_req2(catalog,a,b,c,d):
+    """
+    Ejecuta el requerimiento 2
+    """
+    return controller.comunica_req2(catalog, a, b, c, d)
+
 """
 Menu principal
 """
@@ -130,6 +148,10 @@ while True:
         car,sup,inf = parametros_req1()
         result = execute_req1(catalog, car, sup, inf)
         view_req_1(result)
+
+    elif int(inputs[0]==4):
+        inf_e, sup_e, inf_d, sup_d = parametros_req2()
+        result = execute_req2(catalog, inf_e, sup_e, inf_d, sup_e)
 
 
     elif int(inputs[0]) == 70:

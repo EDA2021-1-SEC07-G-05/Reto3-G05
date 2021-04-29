@@ -67,7 +67,7 @@ def newAnalyzer():
 def addTracks(analyzer, track):
     lt.addLast(analyzer['tracks'], track)
     om.put(analyzer['EvByArtists'], track['artist_id'], track)
-    om.put(analyzer['EvByPista'], track['track_id'], track)
+    om.put(analyzer['EvByPista'], track['id'], track)
     return None
 
 def addCaracAsKey(analyzer, char):
@@ -86,13 +86,16 @@ def addTracksByCarac(analyzer, track, caract):
         arbol_RBT = me.getValue(entry_1)
         entry_2 = om.get(arbol_RBT, rate)
         if entry_2 is not None:
-            lista = me.getValue(entry_2)
-            lt.addLast(lista, track)
-            om.put(arbol_RBT, rate, lista)
+            est_datos = me.getValue(entry_2)
+            mp.put(est_datos['mapa_completo'], int(track['id']), track)
+            mp.put(est_datos['mapa_unicos'], track['track_id'], track)
+            om.put(arbol_RBT, rate, est_datos)
         else:
-            lista = lt.newList(datastructure= 'SINGLED_LINKED',  cmpfunction= compareIds)
-            lt.addLast(lista, track)
-            om.put(arbol_RBT, rate, lista)
+            est_datos = {'mapa_completo': mp.newMap(numelements= 20, maptype= 'PROBING'),
+                         'mapa_unicos': mp.newMap(numelements= 20, maptype= 'PROBING')}
+            mp.put(est_datos['mapa_completo'], int(track['id']), track)
+            mp.put(est_datos['mapa_unicos'], track['track_id'], track)
+            om.put(arbol_RBT, rate, est_datos)    
     return None
 
 # Funciones para creacion de datos
@@ -126,13 +129,13 @@ def consulta_req1(analyzer, car, sup, inf):
     mapa_caracs = analyzer['EvByCaracteristics']
     entry_1 = mp.get(mapa_caracs, car)
     arbol_RBT = me.getValue(entry_1)
-    lista_1 = om.values(arbol_RBT, inf, sup)
+    estructuras = om.values(arbol_RBT, inf, sup)
     mapa_trabajo = mp.newMap(numelements= 100, maptype= 'PROBING', loadfactor= 0.3)
     num_eventos = 0
     num_artistas = 0
-    for lista in lt.iterator(lista_1):
-        num_eventos += lt.size(lista)
-        for track in lt.iterator(lista):
+    for ed in lt.iterator(estructuras):
+        num_eventos += mp.size(ed['mapa_completo'])
+        for track in lt.iterator(mp.valueSet(ed['mapa_completo'])):
             artista = track['artist_id']
             entry_2 = mp.get(mapa_trabajo, artista)
             if entry_2 is None:
@@ -140,6 +143,16 @@ def consulta_req1(analyzer, car, sup, inf):
                 mp.put(mapa_trabajo, artista, 1)
 
     return num_eventos, num_artistas
+
+
+#Apartado funciones req2
+def consulta_req2(analyzer, inf_e, sup_e, inf_d, sup_d):
+    """
+    Ejecuta la consulta sobre los datos para responder al requerimiento 2
+    """
+    mapa_caracs = analyzer['EvByCaracteristics']
+    
+    return None
 
 # Funciones utilizadas para comparar elementos dentro de una lista
 
