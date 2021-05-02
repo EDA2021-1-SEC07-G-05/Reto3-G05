@@ -53,16 +53,32 @@ def newAnalyzer():
     analyzer = {'tracks': None,
                 'EvByCaracteristics' : None,
                 'EvByArtist': None,
-                'EvByPista': None
+                'EvByPista': None,
+                'EvByHour': None,
+                'Genders': None
                 }
 
     analyzer['tracks'] = mp.newMap(numelements= 100, maptype='PROBING')
     analyzer['EvByArtists'] = om.newMap(omaptype= 'RBT', comparefunction= compareIds)
     analyzer['EvByPista'] = om.newMap(omaptype= 'RBT', comparefunction= compareIds)
     analyzer['EvByCaracteristics'] = mp.newMap(numelements= 6, maptype= 'PROBING', loadfactor= 0.3, comparefunction= cmpByCarac)
+    analyzer['EvByHour'] = om.newMap(omaptype='RBT', comparefunction=cmpInts)
+    analyzer['Genders'] = mp.newMap(numelements= 9, maptype= 'PROBING')
     return analyzer
 
 # Funciones para agregar informacion al catalogo
+def addGenders(analyzer):
+    mapa = analyzer['Genders']
+    mp.put(mapa, 'reggae', (60,90))
+    mp.put(mapa, 'down-tempo', (70,100))
+    mp.put(mapa, 'chill-out', (90,1200))
+    mp.put(mapa, 'hip-hop', (85,115))
+    mp.put(mapa, 'jazz and funk', (120,125))
+    mp.put(mapa, 'pop', (100,130))
+    mp.put(mapa, 'R&B', (60,80))
+    mp.put(mapa, 'rock', (110,140))
+    mp.put(mapa, 'metal', (100,160))
+    return None
 
 def addTracks(analyzer, track):
     mp.put(analyzer['tracks'], track['track_id'], track)
@@ -98,7 +114,40 @@ def addTracksByCarac(analyzer, track, caract):
             om.put(arbol_RBT, rate, est_datos)    
     return None
 
+def addTracksByHourTempo(analyzer, track):
+    hora = hour_int(track)
+    tempo = float(track['tempo'])
+    arbol_hora = analyzer['EvByHour']
+    entry_hora = om.get(arbol_hora, hora)
+    if entry_hora is not None:
+        arbol_tempo = me.getValue(entry_hora)
+        entry_tempo = om.get(arbol_tempo, tempo)
+        if entry_tempo is not None:
+            estructura = me.getValue(entry_tempo)
+            mp.put(estructura['mapa_completo'], track['id'], track)
+            mp.put(estructura['mapa_unicos'], track['track_id'], track)
+        else:
+            estructura = {'mapa_completo': mp.newMap(numelements=20, maptype='PROBING'),
+                          'mapa_unicos': mp.newMap(numelements=20, maptype='PROBING')}
+            mp.put(estructura['mapa_completo'], track['id'], track)
+            mp.put(estructura['mapa_unicos'], track['track_id'], track)
+            om.put(arbol_tempo, tempo, estructura)
+    else:
+        arbol = om.newMap(omaptype='RBT',comparefunction=cmpInts)
+        om.put(arbol_hora, hora, arbol)
+    return None
+
+
 # Funciones para creacion de datos
+def hour_int(track):
+    hour = (track['created_at'][11:]).split(':')
+    hora = int(hour[0])*3600
+    minutos = int(hour[1])*60
+    segundos = int(hour[2])
+    hora_segundos = hora+minutos+segundos
+    return hora_segundos
+
+
 
 # Funciones de consulta
 
@@ -193,6 +242,34 @@ def consulta_req2(analyzer, inf_e, sup_e, inf_d, sup_d):
     retorno = lt.subList(lista_entregable, 1, 5)
     return retorno, suma
 
+#Apartado de funciones relacionadas con el requerimiento 5
+def cosulta_req5(analyzer, init, end):
+    mapa_trabajo = mp.newMap(numelements=20, maptype= 'PROBING')
+    init = init.split(":")
+    int_init = int(init[0])*3600+int(init[1])*60+int(init[2])
+    end = end.split(":")
+    int_end =int(end[0])*3600+int(end[1])*60+int(init[2])
+    arbol_hora = analyzer['EvByHour']
+    mapa_genders = analyzer['Genders']
+    lista_mapas = om.values(arbol_hora, int_init, int_end)
+    lista_gen = mp.keySet(mapa_genders)
+    for gender in lt.iterator(lista_gen):
+        mp.put(mapa_trabajo, gender, 0)
+    for arbol_tempo in lt.iterator(lista_mapas):
+        for gender in lt.iterator(lista_gen):
+            entry = mp.get(mapa_genders, gender)
+            tempos = me.getValue(entry)
+            estructuras = om.values(arbol_tempo, tempos[0], tempos[1])
+            suma = 0
+            for estructura in lt.iterator(estructuras):
+                suma += mp.size(estructura['mapa_completo'])
+            entry_tempo = mp.get(mapa_trabajo, gender)
+            conteo = me.getValue(entry_tempo)
+            conteo += suma
+            mp.put(mapa_trabajo, gender, conteo)
+
+    return mapa_trabajo
+
 # Funciones utilizadas para comparar elementos dentro de una lista
 
 def compareIds(id1, id2):
@@ -219,6 +296,17 @@ def cmpByRate(key_1, key_2):
     if key_1 > key_2:
         return 1
     elif key_1 < key_2:
+        return -1
+    else:
+        return 0
+
+def cmpInts(int_1, int_2):
+    """
+    Compara dos valores enteros en el orden de los enteros
+    """
+    if int_1 > int_2:
+        return 1
+    elif int_1 < int_2:
         return -1
     else:
         return 0

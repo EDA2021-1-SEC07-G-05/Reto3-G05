@@ -44,15 +44,22 @@ def loadData(analyzer):
     """
     Carga los datos de los archivos CSV en el modelo
     """
+    suma = 0
     tracksfile = cf.data_dir + 'context_content_features-small.csv'
     input_file = csv.DictReader(open(tracksfile, encoding="utf-8"),
                                 delimiter=",")
     caract = input_file.fieldnames[0:5] + input_file.fieldnames[7:9]
     for char in caract:
         model.addCaracAsKey(analyzer, char)
+    id_a = 1
     for track in input_file:
+        track['id'] = id_a
+        id_a += 1
         model.addTracks(analyzer, track)
         model.addTracksByCarac(analyzer, track, caract)
+        model.addTracksByHourTempo(analyzer, track)
+    model.addGenders(analyzer)
+    print(suma)
     return analyzer
 
 # Funciones de ordenamiento
@@ -77,3 +84,8 @@ def comunica_req2(catalog, inf_e, sup_e, inf_d, sup_d):
     """
     return model.consulta_req2(catalog, inf_e, sup_e, inf_d, sup_d)
 
+def comunica_req5(analyzer, init, end):
+    """
+    Comunica al model la petición del view del requerimiento 5
+    """
+    return model.cosulta_req5(analyzer, init, end)

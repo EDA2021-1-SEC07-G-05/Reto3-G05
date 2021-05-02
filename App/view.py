@@ -24,6 +24,8 @@ import config as cf
 import sys
 import controller
 from DISClib.ADT import list as lt
+from DISClib.ADT import map as mp
+from DISClib.DataStructures import mapentry as me
 assert cf
 
 
@@ -40,6 +42,9 @@ def printMenu():
     print("2- Cargar información al analyzer")
     print("3- Requerimiento 1")
     print("4- Requerimiento 2")
+    print("5- Requerimiento 3")
+    print("6- Requerimiento 4")
+    print("7- Requerimiento 5")
     print("70- Obtener propiedades de los árboles usados")
     print("0- Salir")
 
@@ -133,7 +138,32 @@ def view_req_2(lista):
         e = track['energy']
         d = track['danceability']
         print(f'Track id: {t_id}, energy: {e}, danceability: {d}')
-        
+
+#Funciones relacionadas con el requerimiento 5
+def parametros_req5():
+    init = input("Digite el valor mínimo de la hora del día: ")
+    end = input("Digite el valor máximo de la hora del día: ")
+    return init, end
+
+def execute_req5(catalog, init, end):
+    """
+    Inicia el proceso de ejecución del requerimiento 5
+    """
+    return controller.comunica_req5(catalog, init, end)
+
+def view_req_5(keys, mapa):
+    """
+    Edita el view de los resultados del requerimiento 5
+    """
+    print('\nRESULTADOS ENCONTRADOS')
+    total = 0
+    for key in lt.iterator(keys):
+        entry = mp.get(mapa, key)
+        suma = me.getValue(entry)
+        total += suma
+        print(f'Número de reproducciones de {key}: {suma}')
+    print(f"El total de reproducciones encontradas en el rango dado es de: {total}")
+    return None   
 
 """
 Menu principal
@@ -166,6 +196,12 @@ while True:
         inf_e, sup_e, inf_d, sup_d = parametros_req2()
         result = execute_req2(catalog, inf_e, sup_e, inf_d, sup_d)
         view_req_2(result)
+
+    elif int(inputs[0]) == 7:
+        init, end = parametros_req5()
+        result = execute_req5(catalog, init, end)
+        keys = mp.keySet(result)
+        view_req_5(keys, result)
 
 
 
