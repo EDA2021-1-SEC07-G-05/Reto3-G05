@@ -75,5 +75,5 @@ def comunica_req2(catalog, inf_e, sup_e, inf_d, sup_d):
     """
     Comunica al model la petición del view del requerimiento 2
     """
-    return None
+    return model.consulta_req2(catalog, inf_e, sup_e, inf_d, sup_d)
 

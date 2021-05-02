@@ -56,7 +56,7 @@ def newAnalyzer():
                 'EvByPista': None
                 }
 
-    analyzer['tracks'] = lt.newList('SINGLE_LINKED', compareIds)
+    analyzer['tracks'] = mp.newMap(numelements= 100, maptype='PROBING')
     analyzer['EvByArtists'] = om.newMap(omaptype= 'RBT', comparefunction= compareIds)
     analyzer['EvByPista'] = om.newMap(omaptype= 'RBT', comparefunction= compareIds)
     analyzer['EvByCaracteristics'] = mp.newMap(numelements= 6, maptype= 'PROBING', loadfactor= 0.3, comparefunction= cmpByCarac)
@@ -65,7 +65,7 @@ def newAnalyzer():
 # Funciones para agregar informacion al catalogo
 
 def addTracks(analyzer, track):
-    lt.addLast(analyzer['tracks'], track)
+    mp.put(analyzer['tracks'], track['track_id'], track)
     om.put(analyzer['EvByArtists'], track['artist_id'], track)
     om.put(analyzer['EvByPista'], track['id'], track)
     return None
@@ -118,10 +118,22 @@ def consulta_propiedades(analyzer):
 def consulta_propiedades_carga(analyzer):
     artistas = om.size(analyzer['EvByArtists'])
     pistas = om.size(analyzer['EvByPista'])
-    size_lista = lt.size(analyzer['tracks'])
-    primeros_5 = lt.subList(analyzer['tracks'],1,5)
-    ultimos_5 = lt.subList(analyzer['tracks'],size_lista-4,5)
-    return artistas, pistas, size_lista, primeros_5, ultimos_5
+    size_lista = mp.size(analyzer['tracks'])
+    keys = mp.keySet(analyzer['tracks'])
+    primeros_5 = lt.subList(keys,1,5)
+    ultimos_5 = lt.subList(keys,size_lista-4,5)
+    lista_1 = lt.newList(datastructure='ARRAY_LIST', cmpfunction=compareIds)
+    lista_2 = lt.newList(datastructure='ARRAY_LIST', cmpfunction=compareIds)
+    for key in lt.iterator(primeros_5):
+        entry = mp.get(analyzer['tracks'], key)
+        track = me.getValue(entry)
+        lt.addLast(lista_1, track)
+
+    for key in lt.iterator(ultimos_5):
+        entry = mp.get(analyzer['tracks'], key)
+        track = me.getValue(entry)
+        lt.addLast(lista_2, track)
+    return artistas, pistas, size_lista, lista_1, lista_2
 
     #Apartado de funciones para consulta sobre el requerimiento 1
 def consulta_req1(analyzer, car, sup, inf):
@@ -150,9 +162,36 @@ def consulta_req2(analyzer, inf_e, sup_e, inf_d, sup_d):
     """
     Ejecuta la consulta sobre los datos para responder al requerimiento 2
     """
+    mapa_trabajo = mp.newMap(numelements=20, maptype='PROBING')
+    lista_entregable = lt.newList(datastructure= 'ARRAY_LIST', cmpfunction= compareIds)
     mapa_caracs = analyzer['EvByCaracteristics']
-    
-    return None
+    entry_1 = mp.get(mapa_caracs, 'energy')
+    entry_2 = mp.get(mapa_caracs, 'danceability')
+    arbol_energy = me.getValue(entry_1)
+    arbol_dance = me.getValue(entry_2)
+    #Vamos primero con energy
+    estructuras = om.values(arbol_energy, inf_e, sup_e)
+    for estructura in lt.iterator(estructuras):
+        mapa = estructura['mapa_unicos']
+        tracks = mp.keySet(mapa)
+        for track in lt.iterator(tracks):
+            mp.put(mapa_trabajo, track, 1)
+
+    #Ahora vamos con danceability
+    estructuras = om.values(arbol_dance, inf_d, sup_d)
+    suma = 0
+    for estructura in lt.iterator(estructuras):
+        mapa = estructura['mapa_unicos']
+        tracks = mp.keySet(mapa)
+        for track in lt.iterator(tracks):
+            entry = mp.get(mapa_trabajo, track)
+            if entry is not None:
+                entry_auxiliar = mp.get(analyzer['tracks'], track)
+                track = me.getValue(entry_auxiliar) 
+                lt.addLast(lista_entregable, track)
+                suma += 1
+    retorno = lt.subList(lista_entregable, 1, 5)
+    return retorno, suma
 
 # Funciones utilizadas para comparar elementos dentro de una lista
 
