@@ -44,7 +44,6 @@ def loadData(analyzer):
     """
     Carga los datos de los archivos CSV en el modelo
     """
-    suma = 0
     tracksfile = cf.data_dir + 'context_content_features-small.csv'
     input_file = csv.DictReader(open(tracksfile, encoding="utf-8"),
                                 delimiter=",")
@@ -59,7 +58,18 @@ def loadData(analyzer):
         model.addTracksByCarac(analyzer, track, caract)
         model.addTracksByHourTempo(analyzer, track)
     model.addGenders(analyzer)
-    print(suma)
+
+    tracksfile = cf.data_dir + 'user_track_hashtag_timestamp-small.csv'
+    input_file = csv.DictReader(open(tracksfile, encoding="utf-8"),
+                                delimiter=",")
+    for track in input_file:
+        model.addHashByTrack(analyzer, track)
+
+    tracksfile = cf.data_dir + 'sentiment_values.csv'
+    input_file = csv.DictReader(open(tracksfile, encoding="utf-8"),
+                                delimiter=",")
+    for tag in input_file:
+        model.addVADERbyhashtag(analyzer, tag)
     return analyzer
 
 # Funciones de ordenamiento

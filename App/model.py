@@ -31,6 +31,7 @@ from DISClib.ADT import map as mp
 from DISClib.DataStructures import mapentry as me
 from DISClib.Algorithms.Sorting import shellsort as sa
 from DISClib.ADT import orderedmap as om
+import datetime as dt
 assert cf
 
 """
@@ -55,8 +56,9 @@ def newAnalyzer():
                 'EvByArtist': None,
                 'EvByPista': None,
                 'EvByHour': None,
-                'Genders': None
-                }
+                'Genders': None,
+                '#ByTrack': None,
+                'VaderBy#': None}
 
     analyzer['tracks'] = mp.newMap(numelements= 100, maptype='PROBING')
     analyzer['EvByArtists'] = om.newMap(omaptype= 'RBT', comparefunction= compareIds)
@@ -64,9 +66,32 @@ def newAnalyzer():
     analyzer['EvByCaracteristics'] = mp.newMap(numelements= 6, maptype= 'PROBING', loadfactor= 0.3, comparefunction= cmpByCarac)
     analyzer['EvByHour'] = om.newMap(omaptype='RBT', comparefunction=cmpInts)
     analyzer['Genders'] = mp.newMap(numelements= 9, maptype= 'PROBING')
+    analyzer['#ByTrack'] = mp.newMap(numelements= 100, maptype= "PROBING")
+    analyzer['VaderBy#'] = mp.newMap(numelements= 100, maptype= 'PROBING')
     return analyzer
 
 # Funciones para agregar informacion al catalogo
+
+def addVADERbyhashtag(analyzer, hashtag):
+    mapa = analyzer['VaderBy#']
+    key = hashtag['hashtag']
+    mp.put(mapa, key, hashtag['vader_avg'])
+    return None
+
+def addHashByTrack(analyzer, track):
+    mapa = analyzer['#ByTrack']
+    key = track['track_id']
+    entry = mp.get(mapa, key)
+    if entry is not None:
+        lista = me.getValue(entry)
+        lt.addLast(lista, track['hashtag'])
+        mp.put(mapa, key, lista)
+    else:
+        lista = lt.newList(datastructure= 'ARRAY_LIST', cmpfunction= compareIds)
+        lt.addLast(lista, track['hashtag'])
+        mp.put(mapa,key,lista)
+    return None
+    
 def addGenders(analyzer):
     mapa = analyzer['Genders']
     mp.put(mapa, 'reggae', (60,90))
@@ -124,28 +149,29 @@ def addTracksByHourTempo(analyzer, track):
         entry_tempo = om.get(arbol_tempo, tempo)
         if entry_tempo is not None:
             estructura = me.getValue(entry_tempo)
-            mp.put(estructura['mapa_completo'], track['id'], track)
-            mp.put(estructura['mapa_unicos'], track['track_id'], track)
+            lt.addLast(estructura['mapa_completo'], track)
+            lt.addLast(estructura['mapa_unicos'], track)
         else:
-            estructura = {'mapa_completo': mp.newMap(numelements=20, maptype='PROBING'),
-                          'mapa_unicos': mp.newMap(numelements=20, maptype='PROBING')}
-            mp.put(estructura['mapa_completo'], track['id'], track)
-            mp.put(estructura['mapa_unicos'], track['track_id'], track)
+            estructura = {'mapa_completo': lt.newList(datastructure= "SINGLE_LINKED", cmpfunction= compareTracks),
+                          'mapa_unicos': lt.newList(datastructure= "SINGLE_LINKED", cmpfunction= compareTracks)}
+            lt.addLast(estructura['mapa_completo'], track)
+            lt.addLast(estructura['mapa_unicos'], track)
             om.put(arbol_tempo, tempo, estructura)
     else:
-        arbol = om.newMap(omaptype='RBT',comparefunction=cmpInts)
-        om.put(arbol_hora, hora, arbol)
+        arbol_tempo = om.newMap(omaptype='RBT',comparefunction=cmpInts)
+        estructura = {'mapa_completo': lt.newList(datastructure= "SINGLE_LINKED", cmpfunction= compareTracks),
+                      'mapa_unicos': lt.newList(datastructure= "SINGLE_LINKED", cmpfunction= compareTracks)}
+        lt.addLast(estructura['mapa_completo'], track)
+        lt.addLast(estructura['mapa_unicos'], track)
+        om.put(arbol_tempo, tempo, estructura)
+        om.put(arbol_hora, hora, arbol_tempo)
     return None
 
 
 # Funciones para creacion de datos
 def hour_int(track):
-    hour = (track['created_at'][11:]).split(':')
-    hora = int(hour[0])*3600
-    minutos = int(hour[1])*60
-    segundos = int(hour[2])
-    hora_segundos = hora+minutos+segundos
-    return hora_segundos
+    hora = (track['created_at'].split(" ")[1])[:-3]
+    return (dt.datetime.strptime(hora, "%H:%M")).time()
 
 
 
@@ -245,10 +271,8 @@ def consulta_req2(analyzer, inf_e, sup_e, inf_d, sup_d):
 #Apartado de funciones relacionadas con el requerimiento 5
 def cosulta_req5(analyzer, init, end):
     mapa_trabajo = mp.newMap(numelements=20, maptype= 'PROBING')
-    init = init.split(":")
-    int_init = int(init[0])*3600+int(init[1])*60+int(init[2])
-    end = end.split(":")
-    int_end =int(end[0])*3600+int(end[1])*60+int(init[2])
+    int_init = dt.datetime.strptime(init, "%H:%M").time()
+    int_end = dt.datetime.strptime(end, "%H:%M").time()
     arbol_hora = analyzer['EvByHour']
     mapa_genders = analyzer['Genders']
     lista_mapas = om.values(arbol_hora, int_init, int_end)
@@ -262,16 +286,37 @@ def cosulta_req5(analyzer, init, end):
             estructuras = om.values(arbol_tempo, tempos[0], tempos[1])
             suma = 0
             for estructura in lt.iterator(estructuras):
-                suma += mp.size(estructura['mapa_completo'])
+                suma += lt.size(estructura['mapa_unicos'])
             entry_tempo = mp.get(mapa_trabajo, gender)
             conteo = me.getValue(entry_tempo)
             conteo += suma
             mp.put(mapa_trabajo, gender, conteo)
 
+    keys = mp.keySet(mapa_trabajo)
+    mayor = (aletoso,0)
+    for key in lt.iterator(keys):
+        entry = mp.get(map_trabajo, key)
+        conteo = me.getValue(entry)
+        if conteo > mayor[1]:
+            mayor = (key, conteo)
+
+    entry = mp.get(analyzer['genders'], mayor[0])
+    tempo = me.getValue(entry)
+    """
+    for arbol_tempo in lt.iterator(lista_mapas):
+        estructuras = om.values(arbol_tempo, tempo[0], tempo[1])
+        for track in 
+    """
     return mapa_trabajo
 
 # Funciones utilizadas para comparar elementos dentro de una lista
-
+def compareTracks(track_1, track_2):
+    if (track_1['id'] == track_2['id']):
+        return 0
+    elif track_1['id'] > track_2['id']:
+        return 1
+    else:
+        return -1
 def compareIds(id1, id2):
     """
     Compara dos id de cada pista
