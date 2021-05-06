@@ -150,19 +150,19 @@ def addTracksByHourTempo(analyzer, track):
         if entry_tempo is not None:
             estructura = me.getValue(entry_tempo)
             lt.addLast(estructura['mapa_completo'], track)
-            lt.addLast(estructura['mapa_unicos'], track)
+            mp.put(estructura['mapa_unicos'], track['track_id'], track)
         else:
             estructura = {'mapa_completo': lt.newList(datastructure= "SINGLE_LINKED", cmpfunction= compareTracks),
-                          'mapa_unicos': lt.newList(datastructure= "SINGLE_LINKED", cmpfunction= compareTracks)}
+                          'mapa_unicos': mp.newMap(maptype= 'PROBING', comparefunction= cmpByCarac)}
             lt.addLast(estructura['mapa_completo'], track)
-            lt.addLast(estructura['mapa_unicos'], track)
+            mp.put(estructura['mapa_unicos'], track['track_id'], track)
             om.put(arbol_tempo, tempo, estructura)
     else:
         arbol_tempo = om.newMap(omaptype='RBT',comparefunction=cmpInts)
         estructura = {'mapa_completo': lt.newList(datastructure= "SINGLE_LINKED", cmpfunction= compareTracks),
-                      'mapa_unicos': lt.newList(datastructure= "SINGLE_LINKED", cmpfunction= compareTracks)}
+                      'mapa_unicos': mp.newMap(maptype= 'PROBING', comparefunction= cmpByCarac)}
         lt.addLast(estructura['mapa_completo'], track)
-        lt.addLast(estructura['mapa_unicos'], track)
+        mp.put(estructura['mapa_unicos'], track['track_id'], track)
         om.put(arbol_tempo, tempo, estructura)
         om.put(arbol_hora, hora, arbol_tempo)
     return None
@@ -293,20 +293,26 @@ def cosulta_req5(analyzer, init, end):
             mp.put(mapa_trabajo, gender, conteo)
 
     keys = mp.keySet(mapa_trabajo)
-    mayor = (aletoso,0)
+    mayor = ('aletoso',0)
     for key in lt.iterator(keys):
-        entry = mp.get(map_trabajo, key)
+        entry = mp.get(mapa_trabajo, key)
         conteo = me.getValue(entry)
         if conteo > mayor[1]:
             mayor = (key, conteo)
 
-    entry = mp.get(analyzer['genders'], mayor[0])
+    entry = mp.get(analyzer['Genders'], mayor[0])
     tempo = me.getValue(entry)
-    """
+    lista_trabajo = lt.newList(datastructure= 'ARRAY_LIST', cmpfunction= compareTracks)
+    
+    
     for arbol_tempo in lt.iterator(lista_mapas):
         estructuras = om.values(arbol_tempo, tempo[0], tempo[1])
-        for track in 
-    """
+        for estructura in lt.iterator(estructuras):
+            lista = estructura['mapa_unicos']
+            for track in lt.iterator(lista):
+                key = track['track_id']
+    
+    
     return mapa_trabajo
 
 # Funciones utilizadas para comparar elementos dentro de una lista
