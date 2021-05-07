@@ -167,7 +167,6 @@ def addTracksByHourTempo(analyzer, track):
         om.put(arbol_hora, hora, arbol_tempo)
     return None
 
-
 # Funciones para creacion de datos
 def hour_int(track):
     hora = (track['created_at'].split(" ")[1])[:-3]
@@ -267,6 +266,34 @@ def consulta_req2(analyzer, inf_e, sup_e, inf_d, sup_d):
                 suma += 1
     retorno = lt.subList(lista_entregable, 1, 5)
     return retorno, suma
+
+#Funciones requerimiento #3
+def consulta_req3(analyzer, mini_vali, max_vali, mini_valt, max_valt):
+
+    entry_1 = mp.get(analyzer['EvByCaracteristics'], 'instrumentalness')
+    entry_2 = mp.get(analyzer['EvByCaracteristics'], 'tempo')
+    arbol_inst = me.getValue(entry_1)           
+    arbol_temp = me.getValue(entry_2)
+    estructuras_inst = om.values(arbol_inst, mini_vali, max_vali)
+    estructuras_temp = om.values(arbol_temp, mini_valt, max_valt)
+    mapa_trabajo = mp.newMap(numelements=20, maptype='PROBING')
+    lista = lt.newList('ARRAY_LIST', cmpfunction= compareIds)
+    unique_tracks = 0
+
+    for estruc in lt.iterator(estructuras_inst):
+        tracks = mp.keySet(estruc['mapa_unicos'])
+        for track in lt.iterator(tracks): 
+            mp.put(mapa_trabajo, track, 1)
+
+    for estruc in lt.iterator(estructuras_temp):
+        tracks = mp.keySet(estruc['mapa_unicos'])
+        for track in lt.iterator(tracks):
+            entry = mp.get(mapa_trabajo,track)
+            if entry is not None:
+                unique_tracks += 1
+                lt.addLast(lista, track)
+    lista_final = lt.subList(lista, 1, 5)
+    return unique_tracks, lista_final
 
 #Apartado de funciones relacionadas con el requerimiento 5
 def cosulta_req5(analyzer, init, end):

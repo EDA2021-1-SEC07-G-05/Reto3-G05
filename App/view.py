@@ -138,6 +138,32 @@ def view_req_2(lista):
         e = track['energy']
         d = track['danceability']
         print(f'Track id: {t_id}, energy: {e}, danceability: {d}')
+    
+#Funciones requerimiento #3
+def parametros_req3():
+
+    mini_vali = float(input('Digite el valor mínimo para instrumentalness que desea consultar: '))
+    max_vali = float(input('Digite el valor máximo para instrumentalness que desea consultar: '))
+    mini_valt = float(input('Digite el valor mínimo para el tempo que desea consultar: '))
+    max_valt = float(input('Digite el valor máximo para el tempo que desea consultar: '))
+    return mini_vali, max_vali, mini_valt, max_valt
+
+def execute_req3(catalog, mini_vali, max_vali, mini_valt, max_valt):
+    return controller.execute_req3(catalog, mini_vali, max_vali, mini_valt, max_valt)
+
+def view_req_3(result):
+
+    print('\nRESULTADOS ENCONTRADOS')
+    print(f'\n Número de pistas únicas: {result[0]}')
+    #n = 0
+    for track in lt.iterator(result[1]):
+        #n +=1
+        track_id= int(track['track_id']) #ARREGLAR FUNCION MAJO!!
+        inst= track['instrumentalness']
+        temp = track['tempo']
+        print(f'Track: {track_id},instrumentalness: {inst},tempo: {temp} ')
+
+#Funciones requerimiento #4
 
 #Funciones relacionadas con el requerimiento 5
 def parametros_req5():
@@ -192,18 +218,21 @@ while True:
         result = execute_req1(catalog, car, sup, inf)
         view_req_1(result)
 
-    elif int(inputs[0]) == 4:
+    elif int(inputs[0]) == 4: 
         inf_e, sup_e, inf_d, sup_d = parametros_req2()
         result = execute_req2(catalog, inf_e, sup_e, inf_d, sup_d)
         view_req_2(result)
+
+    elif int(inputs[0]) == 5: 
+        mini_vali, max_vali, mini_valt, max_valt = parametros_req3()
+        result = execute_req3(catalog, mini_vali, max_vali, mini_valt, max_valt)
+        view_req_3(result)
 
     elif int(inputs[0]) == 7:
         init, end = parametros_req5()
         result = execute_req5(catalog, init, end)
         keys = mp.keySet(result)
         view_req_5(keys, result)
-
-
 
     elif int(inputs[0]) == 70:
         result = execute_consulta_propiedades(catalog)

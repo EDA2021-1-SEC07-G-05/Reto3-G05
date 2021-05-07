@@ -29,7 +29,7 @@ import csv
 El controlador se encarga de mediar entre la vista y el modelo.
 """
 
-# Inicialización del Catálogo
+# Inicialización del Catálogo 
 
 def init():
     """
@@ -38,7 +38,7 @@ def init():
     analyzer = model.newAnalyzer()
     return analyzer
 
-# Funciones para la carga de datos
+# Funciones para la carga de datos  
 
 def loadData(analyzer):
     """
@@ -47,7 +47,7 @@ def loadData(analyzer):
     tracksfile = cf.data_dir + 'context_content_features-small.csv'
     input_file = csv.DictReader(open(tracksfile, encoding="utf-8"),
                                 delimiter=",")
-    caract = input_file.fieldnames[0:5] + input_file.fieldnames[7:9]
+    caract = input_file.fieldnames[0:5] + input_file.fieldnames[6:9]
     for char in caract:
         model.addCaracAsKey(analyzer, char)
     id_a = 1
@@ -93,6 +93,9 @@ def comunica_req2(catalog, inf_e, sup_e, inf_d, sup_d):
     Comunica al model la petición del view del requerimiento 2
     """
     return model.consulta_req2(catalog, inf_e, sup_e, inf_d, sup_d)
+
+def execute_req3(catalog, mini_vali, max_vali, mini_valt, max_valt):
+    return model.consulta_req3(catalog, mini_vali, max_vali, mini_valt, max_valt)
 
 def comunica_req5(analyzer, init, end):
     """
