@@ -154,17 +154,30 @@ def execute_req3(catalog, mini_vali, max_vali, mini_valt, max_valt):
 def view_req_3(result):
 
     print('\nRESULTADOS ENCONTRADOS')
-    print(f'\n Número de pistas únicas: {result[0]}')
-    #n = 0
+    print(f'Número de pistas únicas: {result[0]}')
+    n = 0
     for track in lt.iterator(result[1]):
-        #n +=1
-        track_id= int(track['track_id']) #ARREGLAR FUNCION MAJO!!
+        n +=1
+        track_id= track['track_id']
         inst= track['instrumentalness']
         temp = track['tempo']
-        print(f'Track: {track_id},instrumentalness: {inst},tempo: {temp} ')
+        print(f'Track {n}: {track_id}, instrumentalness: {inst}, tempo: {temp}')
 
 #Funciones requerimiento #4
 
+def parametros_req4():
+    genders = input('Digite los géneros musicales que desea consultar: ')
+    return genders
+
+def execute_req4(catalog, genders):
+    return controller.execute_req4(catalog, genders)
+
+def view_req_4(result):
+
+    print('\nRESULTADOS ENCONTRADOS')
+    print(f'Total de reproducciones: {result[0]}')
+    print(result[1]) #aqui imprimo el mapa final completo, aún no he pasado los datos para que se vean lindos 
+    
 #Funciones relacionadas con el requerimiento 5
 def parametros_req5():
     init = input("Digite el valor mínimo de la hora del día: ")
@@ -227,6 +240,11 @@ while True:
         mini_vali, max_vali, mini_valt, max_valt = parametros_req3()
         result = execute_req3(catalog, mini_vali, max_vali, mini_valt, max_valt)
         view_req_3(result)
+    
+    elif int(inputs[0]) == 6: 
+        genders = parametros_req4()
+        result = execute_req4(catalog, genders)
+        view_req_4(result)
 
     elif int(inputs[0]) == 7:
         init, end = parametros_req5()

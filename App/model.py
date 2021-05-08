@@ -119,7 +119,6 @@ def addCaracAsKey(analyzer, char):
     mp.put(analyzer['EvByCaracteristics'], char, nuevo_arbol)
     return None
 
-
 def addTracksByCarac(analyzer, track, caract):
     for car in caract:
         rate = float(track[car])
@@ -142,8 +141,8 @@ def addTracksByCarac(analyzer, track, caract):
 def addTracksByHourTempo(analyzer, track):
     hora = hour_int(track)
     tempo = float(track['tempo'])
-    arbol_hora = analyzer['EvByHour']
-    entry_hora = om.get(arbol_hora, hora)
+    arbol_hora = analyzer['EvByHour'] #arbol principal 
+    entry_hora = om.get(arbol_hora, hora) #llave-valor con hora 
     if entry_hora is not None:
         arbol_tempo = me.getValue(entry_hora)
         entry_tempo = om.get(arbol_tempo, tempo)
@@ -171,8 +170,6 @@ def addTracksByHourTempo(analyzer, track):
 def hour_int(track):
     hora = (track['created_at'].split(" ")[1])[:-3]
     return (dt.datetime.strptime(hora, "%H:%M")).time()
-
-
 
 # Funciones de consulta
 
@@ -283,7 +280,9 @@ def consulta_req3(analyzer, mini_vali, max_vali, mini_valt, max_valt):
     for estruc in lt.iterator(estructuras_inst):
         tracks = mp.keySet(estruc['mapa_unicos'])
         for track in lt.iterator(tracks): 
-            mp.put(mapa_trabajo, track, 1)
+            entry = mp.get(analyzer['tracks'], track)
+            value = me.getValue(entry)
+            mp.put(mapa_trabajo, track, value)
 
     for estruc in lt.iterator(estructuras_temp):
         tracks = mp.keySet(estruc['mapa_unicos'])
@@ -291,9 +290,39 @@ def consulta_req3(analyzer, mini_vali, max_vali, mini_valt, max_valt):
             entry = mp.get(mapa_trabajo,track)
             if entry is not None:
                 unique_tracks += 1
-                lt.addLast(lista, track)
+                value = me.getValue(entry)
+                lt.addLast(lista, value)
     lista_final = lt.subList(lista, 1, 5)
     return unique_tracks, lista_final
+
+#Funciones requerimiento 4
+
+def consulta_req4(analyzer, list_gen):
+    
+    mapa_final = mp.newMap(numelements=10, maptype='PROBING')
+    entry_2 = mp.get(analyzer['EvByCaracteristics'], 'tempo')
+    arbol_tempo = me.getValue(entry_2)
+    tot_eventos = 0
+    for gender in list_gen:
+        num_artistas = 0
+        num_eventos = 0
+        entry_1 = mp.get(analyzer['Genders'], gender)
+        rango = me.getValue(entry_1)
+        estructuras = om.values(arbol_tempo,rango[0],rango[1])
+        lista_trabajo = lt.newList(datastructure='ARRAY_LIST', cmpfunction=compareIds)
+        for estruc in lt.iterator(estructuras):
+            num_eventos += mp.size(estruc['mapa_completo'])
+            for track in lt.iterator(mp.valueSet(estruc['mapa_completo'])):
+                artista = track ['artist_id']
+                if lt.isPresent(lista_trabajo, artista) == 0:
+                    lt.addLast(lista_trabajo,artista)
+                    num_artistas+=1
+        tot_eventos += num_eventos
+        top_artistas = lt.subList(lista_trabajo, 1, 10)
+        info = (num_eventos,num_artistas,top_artistas)
+        mp.put(mapa_final, gender, info)
+
+    return tot_eventos, mapa_final 
 
 #Apartado de funciones relacionadas con el requerimiento 5
 def cosulta_req5(analyzer, init, end):
@@ -343,6 +372,7 @@ def cosulta_req5(analyzer, init, end):
     return mapa_trabajo
 
 # Funciones utilizadas para comparar elementos dentro de una lista
+
 def compareTracks(track_1, track_2):
     if (track_1['id'] == track_2['id']):
         return 0
@@ -350,6 +380,7 @@ def compareTracks(track_1, track_2):
         return 1
     else:
         return -1
+
 def compareIds(id1, id2):
     """
     Compara dos id de cada pista
@@ -388,5 +419,6 @@ def cmpInts(int_1, int_2):
         return -1
     else:
         return 0
+
 # Funciones de ordenamiento
 

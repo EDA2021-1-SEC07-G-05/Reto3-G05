@@ -97,8 +97,12 @@ def comunica_req2(catalog, inf_e, sup_e, inf_d, sup_d):
 def execute_req3(catalog, mini_vali, max_vali, mini_valt, max_valt):
     return model.consulta_req3(catalog, mini_vali, max_vali, mini_valt, max_valt)
 
+def execute_req4(catalog, genders):
+    list_gen = genders.split(",") #separo el string que da el usuario
+    return model.consulta_req4(catalog, list_gen)
+
 def comunica_req5(analyzer, init, end):
     """
     Comunica al model la petición del view del requerimiento 5
     """
-    return model.cosulta_req5(analyzer, init, end)
+    return model.cosulta_req5(analyzer, init, end) 
