@@ -75,7 +75,10 @@ def newAnalyzer():
 def addVADERbyhashtag(analyzer, hashtag):
     mapa = analyzer['VaderBy#']
     key = hashtag['hashtag']
-    mp.put(mapa, key, hashtag['vader_avg'])
+    if hashtag['vader_avg'] is not '':
+        mp.put(mapa, key, hashtag['vader_avg'])
+    else:
+        mp.put(mapa, key, None)
     return None
 
 def addHashByTrack(analyzer, track):
@@ -83,13 +86,13 @@ def addHashByTrack(analyzer, track):
     key = track['track_id']
     entry = mp.get(mapa, key)
     if entry is not None:
-        lista = me.getValue(entry)
-        lt.addLast(lista, track['hashtag'])
-        mp.put(mapa, key, lista)
+        mapa_1 = me.getValue(entry)
+        mp.put(mapa_1, track['hashtag'].lower(), 0)
+        mp.put(mapa, key, mapa_1)
     else:
-        lista = lt.newList(datastructure= 'ARRAY_LIST', cmpfunction= compareIds)
-        lt.addLast(lista, track['hashtag'])
-        mp.put(mapa,key,lista)
+        mapa_1 =  mp.newMap(maptype= 'PROBING', comparefunction= cmpByCarac)
+        mp.put(mapa_1, track['hashtag'].lower(), 0)
+        mp.put(mapa,key,mapa_1)
     return None
     
 def addGenders(analyzer):
@@ -348,6 +351,9 @@ def cosulta_req5(analyzer, init, end):
             conteo += suma
             mp.put(mapa_trabajo, gender, conteo)
 
+
+    mapa_hashtag = analyzer['#ByTrack']
+    mapa_VADER = analyzer['VaderBy#']
     keys = mp.keySet(mapa_trabajo)
     mayor = ('aletoso',0)
     for key in lt.iterator(keys):
@@ -358,18 +364,33 @@ def cosulta_req5(analyzer, init, end):
 
     entry = mp.get(analyzer['Genders'], mayor[0])
     tempo = me.getValue(entry)
-    lista_trabajo = lt.newList(datastructure= 'ARRAY_LIST', cmpfunction= compareTracks)
+    lista_trabajo = lt.newList(datastructure= 'ARRAY_LIST', cmpfunction= cmpByNumhashtags)
     
     
     for arbol_tempo in lt.iterator(lista_mapas):
         estructuras = om.values(arbol_tempo, tempo[0], tempo[1])
         for estructura in lt.iterator(estructuras):
-            lista = estructura['mapa_unicos']
-            for track in lt.iterator(lista):
-                key = track['track_id']
+            mapa = estructura['mapa_unicos']
+            for key in lt.iterator(mp.keySet(mapa)):
+                entry = mp.get(mapa_hashtag, key)
+                mapa_otra_vez = me.getValue(entry)
+                num_hashtags = lt.size(mp.keySet(mapa_otra_vez))
+                prom = 0
+                for hashtag in lt.iterator(mp.keySet(mapa_otra_vez)):
+                    entry = mp.get(mapa_VADER, hashtag)
+                    if entry is not None:
+                        value = me.getValue(entry)
+                        if value is not None:
+                            prom += float(value)
+                tres_tupla = (key, num_hashtags, prom/num_hashtags)
+                lt.addLast(lista_trabajo, tres_tupla)
+
+    sort_list = sa.sort(lista_trabajo, cmpByNumhashtags)
+    sublist = lt.subList(sort_list, 1, 10)
     
+    print(mayor)
     
-    return mapa_trabajo
+    return mapa_trabajo, sublist
 
 # Funciones utilizadas para comparar elementos dentro de una lista
 
@@ -420,5 +441,15 @@ def cmpInts(int_1, int_2):
     else:
         return 0
 
-# Funciones de ordenamiento
+def cmpByNumhashtags(tuple_1, tuple_2):
+    v_1 = tuple_1[1]
+    v_2 = tuple_2[1]
+    if v_1 > v_2:
+        return 1
+    elif v_1 < v_2:
+        return -1
+    else:
+        return 0
 
+
+# Funciones de ordenamiento

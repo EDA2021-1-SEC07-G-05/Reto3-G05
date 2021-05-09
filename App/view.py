@@ -190,7 +190,7 @@ def execute_req5(catalog, init, end):
     """
     return controller.comunica_req5(catalog, init, end)
 
-def view_req_5(keys, mapa):
+def view_req_5_part1(keys, mapa):
     """
     Edita el view de los resultados del requerimiento 5
     """
@@ -204,6 +204,14 @@ def view_req_5(keys, mapa):
     print(f"El total de reproducciones encontradas en el rango dado es de: {total}")
     return None   
 
+def view_req_5_part2(lista_top_of_the_world):
+    print('\nTOP TRACKS POR HASHTAGS')
+    i = 1
+    for track in lt.iterator(lista_top_of_the_world):
+        print(f"Track {i}: {track[0]}, Hashtags: {track[1]}, VADER promedio: {track[2]}")
+        i+=1
+    print("\n")
+    return None
 """
 Menu principal
 """
@@ -249,8 +257,9 @@ while True:
     elif int(inputs[0]) == 7:
         init, end = parametros_req5()
         result = execute_req5(catalog, init, end)
-        keys = mp.keySet(result)
-        view_req_5(keys, result)
+        keys = mp.keySet(result[0])
+        view_req_5_part1(keys, result[0])
+        view_req_5_part2(result[1])
 
     elif int(inputs[0]) == 70:
         result = execute_consulta_propiedades(catalog)
