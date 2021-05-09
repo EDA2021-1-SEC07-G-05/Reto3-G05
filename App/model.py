@@ -99,7 +99,7 @@ def addGenders(analyzer):
     mapa = analyzer['Genders']
     mp.put(mapa, 'reggae', (60,90))
     mp.put(mapa, 'down-tempo', (70,100))
-    mp.put(mapa, 'chill-out', (90,1200))
+    mp.put(mapa, 'chill-out', (90,120))
     mp.put(mapa, 'hip-hop', (85,115))
     mp.put(mapa, 'jazz and funk', (120,125))
     mp.put(mapa, 'pop', (100,130))
@@ -153,6 +153,7 @@ def addTracksByHourTempo(analyzer, track):
             estructura = me.getValue(entry_tempo)
             lt.addLast(estructura['mapa_completo'], track)
             mp.put(estructura['mapa_unicos'], track['track_id'], track)
+            om.put(arbol_tempo, tempo, estructura)
         else:
             estructura = {'mapa_completo': lt.newList(datastructure= "SINGLE_LINKED", cmpfunction= compareTracks),
                           'mapa_unicos': mp.newMap(maptype= 'PROBING', comparefunction= cmpByCarac)}
@@ -171,10 +172,30 @@ def addTracksByHourTempo(analyzer, track):
 
 # Funciones para creacion de datos
 def hour_int(track):
-    hora = (track['created_at'].split(" ")[1])[:-3]
-    return (dt.datetime.strptime(hora, "%H:%M")).time()
+    hora = (track['created_at'].split(" ")[1])
+    return (dt.datetime.strptime(hora, "%H:%M:%S")).time()
 
 # Funciones de consulta
+
+def consulta_auxiliar(analyzer):
+    arbol_hora = analyzer['EvByHour']
+    horas = om.keySet(arbol_hora)
+    num_reproducciones = 0
+    num_tracks = 0
+    for hora in lt.iterator(horas):
+        entry = om.get(arbol_hora, hora)
+        arbol_tempo = me.getValue(entry)
+        tempos = om.keySet(arbol_tempo)
+        for tempo in lt.iterator(tempos):
+            entry_tempo = om.get(arbol_tempo, tempo)
+            estructura = me.getValue(entry_tempo)
+            eventos = estructura['mapa_completo']
+            mapa_tracks = estructura['mapa_unicos']
+            tracks = mp.keySet(mapa_tracks)
+            num_reproducciones += lt.size(eventos)
+            num_tracks += lt.size(tracks)
+    print(f"Reproducciones: {num_reproducciones}\nTracks: {num_tracks}")
+    return None
 
     #Apartado de funciones para consulta sobre la carga de datos
 def consulta_propiedades(analyzer):
@@ -329,29 +350,38 @@ def consulta_req4(analyzer, list_gen):
 
 #Apartado de funciones relacionadas con el requerimiento 5
 def cosulta_req5(analyzer, init, end):
-    mapa_trabajo = mp.newMap(numelements=20, maptype= 'PROBING')
-    int_init = dt.datetime.strptime(init, "%H:%M").time()
-    int_end = dt.datetime.strptime(end, "%H:%M").time()
+    """
+    Apartado de la primera parte de la consulta
+    """
+    mapa_trabajo = mp.newMap(maptype='PROBING', comparefunction=cmpByCarac)
+    hora_1 = (dt.datetime.strptime(init, "%H:%M:%S")).time()
+    hora_2 = (dt.datetime.strptime(end, "%H:%M:%S")).time()
     arbol_hora = analyzer['EvByHour']
     mapa_genders = analyzer['Genders']
-    lista_mapas = om.values(arbol_hora, int_init, int_end)
-    lista_gen = mp.keySet(mapa_genders)
-    for gender in lt.iterator(lista_gen):
+    genders = mp.keySet(mapa_genders)
+    for gender in lt.iterator(genders):
         mp.put(mapa_trabajo, gender, 0)
-    for arbol_tempo in lt.iterator(lista_mapas):
-        for gender in lt.iterator(lista_gen):
-            entry = mp.get(mapa_genders, gender)
-            tempos = me.getValue(entry)
-            estructuras = om.values(arbol_tempo, tempos[0], tempos[1])
-            suma = 0
+    arboles_tempo = om.values(arbol_hora, hora_1, hora_2)
+    reproducciones = 0
+    for arbol_tempo in lt.iterator(arboles_tempo):
+        for gender in lt.iterator(genders):
+            entry_tempos = mp.get(mapa_genders, gender)
+            tempo = me.getValue(entry_tempos)
+            piso = om.floor(arbol_tempo, tempo[0])
+            techo = om.ceiling(arbol_tempo, tempo[1])
+            print(piso,techo)
+            estructuras = om.values(arbol_tempo, piso, techo)
+            contador = 0
             for estructura in lt.iterator(estructuras):
-                suma += lt.size(estructura['mapa_unicos'])
-            entry_tempo = mp.get(mapa_trabajo, gender)
-            conteo = me.getValue(entry_tempo)
-            conteo += suma
-            mp.put(mapa_trabajo, gender, conteo)
+                reproducciones = lt.size(estructura['mapa_completo'])
+                contador += reproducciones
+            entry_num_reproducciones = mp.get(mapa_trabajo, gender)
+            num_reproducciones = me.getValue(entry_num_reproducciones)
+            num_reproducciones += contador
+            mp.put(mapa_trabajo, gender, num_reproducciones)
 
 
+    """
     mapa_hashtag = analyzer['#ByTrack']
     mapa_VADER = analyzer['VaderBy#']
     keys = mp.keySet(mapa_trabajo)
@@ -387,10 +417,11 @@ def cosulta_req5(analyzer, init, end):
 
     sort_list = sa.sort(lista_trabajo, cmpByNumhashtags)
     sublist = lt.subList(sort_list, 1, 10)
-    
+
     print(mayor)
+    """
     
-    return mapa_trabajo, sublist
+    return mapa_trabajo, None
 
 # Funciones utilizadas para comparar elementos dentro de una lista
 

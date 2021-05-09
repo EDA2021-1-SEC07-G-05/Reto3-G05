@@ -23,6 +23,7 @@
 import config as cf
 import sys
 import controller
+import model
 from DISClib.ADT import list as lt
 from DISClib.ADT import map as mp
 from DISClib.DataStructures import mapentry as me
@@ -105,9 +106,9 @@ def view_req_1(result):
     """
     Edita el view de los resultados del requerimiento 1
     """
-    print("RESULTADOS ENCONTRADOS")
+    print("\nRESULTADOS ENCONTRADOS")
     print(f"Total de eventos de escucha: {result[0]}")
-    print(f"Total de artistas únicos: {result[1]}")
+    print(f"Total de artistas únicos: {result[1]}\n")
     return None
 
 #Funciones relacionadas con el requerimiento 2
@@ -138,6 +139,8 @@ def view_req_2(lista):
         e = track['energy']
         d = track['danceability']
         print(f'Track id: {t_id}, energy: {e}, danceability: {d}')
+
+    print("\n")
     
 #Funciones requerimiento #3
 def parametros_req3():
@@ -226,13 +229,14 @@ while True:
         print("Cargando información de los archivos ....")
         answer = execute_loadData(catalog)
         propiedades = execute_propiedades_carga(catalog)
-        print(f"Registros de eventos de escucha cargados: {propiedades[2]}\n")
+        print(f"Registros de eventos de escucha cargados: {propiedades[1]}\n")
         print(f"Resgistros de artistas únicos cargados: {propiedades[0]}\n")
-        print(f"Registros de pistas únicas cargadas: {propiedades[1]}\n")
+        print(f"Registros de pistas únicas cargadas: {propiedades[2]}\n")
         print("Primeros 5 eventos cargados:")
         view_elementos_lista_carga(propiedades[3])
         print("Ultimos 5 eventos cargados: ")
         view_elementos_lista_carga(propiedades[4])
+        model.consulta_auxiliar(catalog)
 
     elif int(inputs[0]) == 3:
         car,sup,inf = parametros_req1()
@@ -259,7 +263,7 @@ while True:
         result = execute_req5(catalog, init, end)
         keys = mp.keySet(result[0])
         view_req_5_part1(keys, result[0])
-        view_req_5_part2(result[1])
+        #view_req_5_part2(result[1])
 
     elif int(inputs[0]) == 70:
         result = execute_consulta_propiedades(catalog)
