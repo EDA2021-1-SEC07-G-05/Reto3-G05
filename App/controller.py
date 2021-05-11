@@ -133,10 +133,28 @@ def execute_req4(catalog, name_gen, min_val, max_val, genders, indicator):
 
     list_gen = genders.split(",")
     if indicator == 1:
-        model.addGender(catalog,name_gen,min_val,max_val)
+        tr.start()
+        star_time = getTime()
+        start_memory = getMemory()
         result = model.consulta_req4(catalog, list_gen)
+        stop_time = getTime()
+        stop_memory = getMemory()
+        delta_time = stop_time - star_time
+        delta_memory= deltaMemory(start_memory, stop_memory)
+        tr.stop()
+        print(f"Tiempo: {delta_time}, Espacio: {delta_memory}")
+        model.addGender(catalog,name_gen,min_val,max_val)
     else:
+        r.start()
+        star_time = getTime()
+        start_memory = getMemory()
         result = model.consulta_req4(catalog,list_gen)
+        stop_time = getTime()
+        stop_memory = getMemory()
+        delta_time = stop_time - star_time
+        delta_memory= deltaMemory(start_memory, stop_memory)
+        tr.stop()
+        print(f"Tiempo: {delta_time}, Espacio: {delta_memory}")
     return result
 
 def execute_removeGender(catalog, name_gen):
