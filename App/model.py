@@ -325,6 +325,7 @@ def consulta_req3(analyzer, mini_vali, max_vali, mini_valt, max_valt):
 
 #Funciones requerimiento 4
 
+
 def consulta_req4(analyzer, list_gen):
     
     mapa_final = mp.newMap(numelements=10, maptype='PROBING')
@@ -337,16 +338,17 @@ def consulta_req4(analyzer, list_gen):
         entry_1 = mp.get(analyzer['Genders'], gender)
         rango = me.getValue(entry_1)
         estructuras = om.values(arbol_tempo,rango[0],rango[1])
-        lista_trabajo = lt.newList(datastructure='ARRAY_LIST', cmpfunction=compareIds)
+        mapa_trabajo = mp.newMap(numelements=80, maptype='PROBING')
         for estruc in lt.iterator(estructuras):
             num_eventos += mp.size(estruc['mapa_completo'])
             for track in lt.iterator(mp.valueSet(estruc['mapa_completo'])):
                 artista = track ['artist_id']
-                if lt.isPresent(lista_trabajo, artista) == 0:
-                    lt.addLast(lista_trabajo,artista)
+                if mp.contains(mapa_trabajo,artista)== False:
+                    mp.put(mapa_trabajo,artista,1)
                     num_artistas+=1
         tot_eventos += num_eventos
-        top_artistas = lt.subList(lista_trabajo, 1, 10)
+        keys =mp.keySet(mapa_trabajo)
+        top_artistas = lt.subList(keys, 1, 10)
         info = (num_eventos,num_artistas,top_artistas)
         mp.put(mapa_final, gender, info)
 

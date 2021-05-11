@@ -106,7 +106,7 @@ def execute_req4(catalog, name_gen, min_val, max_val, genders, indicator):
     else:
         result = model.consulta_req4(catalog,list_gen)
     return result
-    
+
 def execute_removeGender(catalog, name_gen):
     return model.removeGender(catalog, name_gen)
 

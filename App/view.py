@@ -204,7 +204,7 @@ def view_req_4(result,keys):
             print(i)
             p += 1
         print('\n')
-    
+
 #Funciones relacionadas con el requerimiento 5
 def parametros_req5():
     init = input("Digite el valor mínimo de la hora del día: ")
@@ -283,7 +283,8 @@ while True:
         result = execute_req4(catalog, name_gen, min_val, max_val, genders, indicator)
         keys = mp.keySet(result[1])
         view_req_4(result,keys)
-        execute_removeGender(catalog, name_gen)
+        if indicator == 1:
+            execute_removeGender(catalog, name_gen)
        
     elif int(inputs[0]) == 7:
         init, end = parametros_req5()
