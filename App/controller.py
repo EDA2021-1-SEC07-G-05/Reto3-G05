@@ -145,7 +145,7 @@ def execute_req4(catalog, name_gen, min_val, max_val, genders, indicator):
         print(f"Tiempo: {delta_time}, Espacio: {delta_memory}")
         model.addGender(catalog,name_gen,min_val,max_val)
     else:
-        r.start()
+        tr.start()
         star_time = getTime()
         start_memory = getMemory()
         result = model.consulta_req4(catalog,list_gen)
@@ -164,7 +164,6 @@ def comunica_req5(analyzer, init, end):
     """
     Comunica al model la petición del view del requerimiento 5
     """
-    list_gen = genders.split(",") #separo el string que da el usuario
     tr.start()
     star_time = getTime()
     start_memory = getMemory()
