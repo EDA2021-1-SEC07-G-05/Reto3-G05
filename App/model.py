@@ -170,6 +170,10 @@ def addTracksByHourTempo(analyzer, track):
         om.put(arbol_hora, hora, arbol_tempo)
     return None
 
+def addGender(analyzer, gender, min_val, max_val):
+    mp.put(analyzer['Genders'],gender,(min_val,max_val))
+    return None
+
 # Funciones para creacion de datos
 def hour_int(track):
     hora = (track['created_at'].split(" ")[1])
@@ -483,4 +487,8 @@ def cmpByNumhashtags(tuple_1, tuple_2):
         return 0
 
 
-# Funciones de ordenamiento
+# Funciones para eliminar informacion del catalogo
+
+def removeGender(analyzer,name_gen):
+    mp.remove(analyzer['Genders'], name_gen)
+    return None

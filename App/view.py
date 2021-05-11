@@ -168,18 +168,42 @@ def view_req_3(result):
 
 #Funciones requerimiento #4
 
-def parametros_req4():
-    genders = input('Digite los géneros musicales que desea consultar: ')
-    return genders
+def parametros_req4(indicator):
+    
+    if indicator == 1:
+        name_gen = input('Digite el nombre del nuevo género: ')
+        min_val = float(input('Digite el valor mínimo del Tempo para el nuevo género: '))
+        max_val = float(input('Digite el valor máximo del Tempo para el nuevo género: '))
+        genders = input('Digite los géneros musicales que desea consultar: ')
+    elif indicator == 0: 
+        name_gen = None
+        min_val = None
+        max_val = None
+        genders = input('Digite los géneros musicales que desea consultar: ')
+    return name_gen, min_val, max_val, genders
 
-def execute_req4(catalog, genders):
-    return controller.execute_req4(catalog, genders)
+def execute_req4(catalog, name_gen, min_val, max_val, genders,indicator):
+    return controller.execute_req4(catalog, name_gen, min_val, max_val, genders, indicator)
 
-def view_req_4(result):
+def execute_removeGender(catalog, name_gen):
+    return controller.execute_removeGender(catalog, name_gen)
+
+def view_req_4(result,keys):
 
     print('\nRESULTADOS ENCONTRADOS')
-    print(f'Total de reproducciones: {result[0]}')
-    print(result[1]) #aqui imprimo el mapa final completo, aún no he pasado los datos para que se vean lindos 
+    print(f'Total de reproducciones en todos los géneros consultados: {result[0]}\n')
+    for key in lt.iterator(keys):
+        entry = mp.get(result[1],key)
+        valor = me.getValue(entry)
+        print(key.upper())
+        print (f'Total de reproducciones: {valor[0]}')
+        print(f'Número de artistas únicos: {valor[1]}')
+        print(f'Lista de los primeros artistas: \n')
+        p = 1
+        for i in lt.iterator(valor[2]):
+            print(i)
+            p += 1
+        print('\n')
     
 #Funciones relacionadas con el requerimiento 5
 def parametros_req5():
@@ -254,10 +278,13 @@ while True:
         view_req_3(result)
     
     elif int(inputs[0]) == 6: 
-        genders = parametros_req4()
-        result = execute_req4(catalog, genders)
-        view_req_4(result)
-
+        indicator = int(input('Si desea agregar un nuevo género musical digite el número 1, de lo contrario digite el número 0: '))
+        name_gen, min_val, max_val, genders = parametros_req4(indicator)
+        result = execute_req4(catalog, name_gen, min_val, max_val, genders, indicator)
+        keys = mp.keySet(result[1])
+        view_req_4(result,keys)
+        execute_removeGender(catalog, name_gen)
+       
     elif int(inputs[0]) == 7:
         init, end = parametros_req5()
         result = execute_req5(catalog, init, end)
