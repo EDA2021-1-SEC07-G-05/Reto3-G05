@@ -23,6 +23,8 @@
 import config as cf
 import model
 import csv
+import time
+import tracemalloc as tr
 
 
 """
@@ -86,23 +88,103 @@ def comunica_req1(catalog, car, sup, inf):
     """
     Comunica al model la petición del view del requerimiento 1
     """
-    return model.consulta_req1(catalog,car,sup,inf)
+    tr.start()
+    star_time = getTime()
+    start_memory = getMemory()
+    result = model.consulta_req1(catalog,car,sup,inf)
+    stop_time = getTime()
+    stop_memory = getMemory()
+    delta_time = stop_time - star_time
+    delta_memory= deltaMemory(start_memory, stop_memory)
+    tr.stop()
+    print(f"Tiempo: {delta_time}, Espacio: {delta_memory}")
+    return result
 
 def comunica_req2(catalog, inf_e, sup_e, inf_d, sup_d):
     """
     Comunica al model la petición del view del requerimiento 2
     """
-    return model.consulta_req2(catalog, inf_e, sup_e, inf_d, sup_d)
+    tr.start()
+    star_time = getTime()
+    start_memory = getMemory()
+    result = model.consulta_req2(catalog, inf_e, sup_e, inf_d, sup_d)
+    stop_time = getTime()
+    stop_memory = getMemory()
+    delta_time = stop_time - star_time
+    delta_memory= deltaMemory(start_memory, stop_memory)
+    tr.stop()
+    print(f"Tiempo: {delta_time}, Espacio: {delta_memory}")
+    return result
 
 def execute_req3(catalog, mini_vali, max_vali, mini_valt, max_valt):
-    return model.consulta_req3(catalog, mini_vali, max_vali, mini_valt, max_valt)
+    tr.start()
+    star_time = getTime()
+    start_memory = getMemory()
+    result = model.consulta_req3(catalog, mini_vali, max_vali, mini_valt, max_valt)
+    stop_time = getTime()
+    stop_memory = getMemory()
+    delta_time = stop_time - star_time
+    delta_memory= deltaMemory(start_memory, stop_memory)
+    tr.stop()
+    print(f"Tiempo: {delta_time}, Espacio: {delta_memory}")
+    return result
 
 def execute_req4(catalog, genders):
     list_gen = genders.split(",") #separo el string que da el usuario
-    return model.consulta_req4(catalog, list_gen)
+    tr.start()
+    star_time = getTime()
+    start_memory = getMemory()
+    result = model.consulta_req4(catalog, list_gen)
+    stop_time = getTime()
+    stop_memory = getMemory()
+    delta_time = stop_time - star_time
+    delta_memory= deltaMemory(start_memory, stop_memory)
+    tr.stop()
+    print(f"Tiempo: {delta_time}, Espacio: {delta_memory}")
+    return result
 
 def comunica_req5(analyzer, init, end):
     """
     Comunica al model la petición del view del requerimiento 5
     """
-    return model.cosulta_req5(analyzer, init, end) 
+    list_gen = genders.split(",") #separo el string que da el usuario
+    tr.start()
+    star_time = getTime()
+    start_memory = getMemory()
+    result = model.cosulta_req5(analyzer, init, end)
+    stop_time = getTime()
+    stop_memory = getMemory()
+    delta_time = stop_time - star_time
+    delta_memory= deltaMemory(start_memory, stop_memory)
+    tr.stop()
+    print(f"Tiempo: {delta_time}, Espacio: {delta_memory}")
+    return result
+
+
+# Funciones ppara medir tiempo y memoria
+
+def getTime():
+    """
+    Devuelvo un tiempo determinado por el procesador
+    """
+    return float(time.perf_counter()*1000)
+
+def getMemory():
+    """
+    Devuelve una 'pantallazo' de la memoria usada
+    """
+    return tr.take_snapshot()
+
+def deltaMemory(star_memory, stop_memory):
+    """
+    Devuelve la diferencia entre dos magnitudes de memoria tomadas
+    en dos diferentes instantes. Las devuelve en KB
+    """
+    memory_diff = stop_memory.compare_to(star_memory, 'filename')
+    delta_memory = 0.0
+
+    for stat in memory_diff:
+        delta_memory = delta_memory + stat.size_diff
+
+    delta_memory /= 1024.0
+    return delta_memory

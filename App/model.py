@@ -29,7 +29,7 @@ import config as cf
 from DISClib.ADT import list as lt
 from DISClib.ADT import map as mp
 from DISClib.DataStructures import mapentry as me
-from DISClib.Algorithms.Sorting import shellsort as sa
+from DISClib.Algorithms.Sorting import mergesort as sa
 from DISClib.ADT import orderedmap as om
 import datetime as dt
 assert cf
@@ -335,8 +335,8 @@ def consulta_req4(analyzer, list_gen):
         estructuras = om.values(arbol_tempo,rango[0],rango[1])
         lista_trabajo = lt.newList(datastructure='ARRAY_LIST', cmpfunction=compareIds)
         for estruc in lt.iterator(estructuras):
-            num_eventos += mp.size(estruc['mapa_completo'])
             for track in lt.iterator(mp.valueSet(estruc['mapa_completo'])):
+                num_eventos += 1
                 artista = track ['artist_id']
                 if lt.isPresent(lista_trabajo, artista) == 0:
                     lt.addLast(lista_trabajo,artista)
@@ -362,15 +362,17 @@ def cosulta_req5(analyzer, init, end):
     for gender in lt.iterator(genders):
         mp.put(mapa_trabajo, gender, 0)
     arboles_tempo = om.values(arbol_hora, hora_1, hora_2)
-    reproducciones = 0
+    unique = 0
     for arbol_tempo in lt.iterator(arboles_tempo):
+        todos_los_tempos = om.keySet(arbol_tempo)
+        for key in lt.iterator(todos_los_tempos):
+            entry_tempos_unicos = om.get(arbol_tempo, key)
+            estructura = me.getValue(entry_tempos_unicos)
+            unique += lt.size(estructura['mapa_completo'])
         for gender in lt.iterator(genders):
             entry_tempos = mp.get(mapa_genders, gender)
             tempo = me.getValue(entry_tempos)
-            piso = om.floor(arbol_tempo, tempo[0])
-            techo = om.ceiling(arbol_tempo, tempo[1])
-            print(piso,techo)
-            estructuras = om.values(arbol_tempo, piso, techo)
+            estructuras = om.values(arbol_tempo, tempo[0], tempo[1])
             contador = 0
             for estructura in lt.iterator(estructuras):
                 reproducciones = lt.size(estructura['mapa_completo'])
@@ -380,8 +382,15 @@ def cosulta_req5(analyzer, init, end):
             num_reproducciones += contador
             mp.put(mapa_trabajo, gender, num_reproducciones)
 
+    lista_reproducciones_unicos = lt.newList(datastructure= "SINGLE_LINKED")
 
-    """
+    for gender in lt.iterator(genders):
+        entry = mp.get(mapa_trabajo, gender)
+        tupla = (gender, me.getValue(entry))
+        lt.addLast(lista_reproducciones_unicos, tupla)
+
+    lista_final = sa.sort(lista_reproducciones_unicos, cmptuples)
+    
     mapa_hashtag = analyzer['#ByTrack']
     mapa_VADER = analyzer['VaderBy#']
     keys = mp.keySet(mapa_trabajo)
@@ -394,17 +403,17 @@ def cosulta_req5(analyzer, init, end):
 
     entry = mp.get(analyzer['Genders'], mayor[0])
     tempo = me.getValue(entry)
-    lista_trabajo = lt.newList(datastructure= 'ARRAY_LIST', cmpfunction= cmpByNumhashtags)
+    lista_trabajo = lt.newList(datastructure= 'ARRAY_LIST', cmpfunction= cmptuples)
     
     
-    for arbol_tempo in lt.iterator(lista_mapas):
+    for arbol_tempo in lt.iterator(arboles_tempo):
         estructuras = om.values(arbol_tempo, tempo[0], tempo[1])
         for estructura in lt.iterator(estructuras):
             mapa = estructura['mapa_unicos']
             for key in lt.iterator(mp.keySet(mapa)):
                 entry = mp.get(mapa_hashtag, key)
                 mapa_otra_vez = me.getValue(entry)
-                num_hashtags = lt.size(mp.keySet(mapa_otra_vez))
+                num_hashtags = 0
                 prom = 0
                 for hashtag in lt.iterator(mp.keySet(mapa_otra_vez)):
                     entry = mp.get(mapa_VADER, hashtag)
@@ -412,16 +421,16 @@ def cosulta_req5(analyzer, init, end):
                         value = me.getValue(entry)
                         if value is not None:
                             prom += float(value)
-                tres_tupla = (key, num_hashtags, prom/num_hashtags)
+                            num_hashtags += 1
+                try:
+                    tres_tupla = (key, num_hashtags, prom/num_hashtags)
+                except:
+                    tres_tupla = (key, num_hashtags, 0)
                 lt.addLast(lista_trabajo, tres_tupla)
 
-    sort_list = sa.sort(lista_trabajo, cmpByNumhashtags)
+    sort_list = sa.sort(lista_trabajo, cmptuples)
     sublist = lt.subList(sort_list, 1, 10)
-
-    print(mayor)
-    """
-    
-    return mapa_trabajo, None
+    return lista_final, sublist, unique
 
 # Funciones utilizadas para comparar elementos dentro de una lista
 
@@ -472,7 +481,7 @@ def cmpInts(int_1, int_2):
     else:
         return 0
 
-def cmpByNumhashtags(tuple_1, tuple_2):
+def cmptuples(tuple_1, tuple_2):
     v_1 = tuple_1[1]
     v_2 = tuple_2[1]
     if v_1 > v_2:

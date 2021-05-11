@@ -23,7 +23,6 @@
 import config as cf
 import sys
 import controller
-import model
 from DISClib.ADT import list as lt
 from DISClib.ADT import map as mp
 from DISClib.DataStructures import mapentry as me
@@ -193,18 +192,15 @@ def execute_req5(catalog, init, end):
     """
     return controller.comunica_req5(catalog, init, end)
 
-def view_req_5_part1(keys, mapa):
+def view_req_5_part1(lista):
     """
     Edita el view de los resultados del requerimiento 5
     """
-    print('\nRESULTADOS ENCONTRADOS')
     total = 0
-    for key in lt.iterator(keys):
-        entry = mp.get(mapa, key)
-        suma = me.getValue(entry)
-        total += suma
-        print(f'Número de reproducciones de {key}: {suma}')
-    print(f"El total de reproducciones encontradas en el rango dado es de: {total}")
+    for tupla in lt.iterator(lista):
+        total += tupla[1]
+        print(f'Número de reproducciones de {tupla[0]}: {tupla[1]}')
+    print(f"\nEl total de reproducciones de todas las categorías (con repetición) encontradas en el rango dado es de: {total}")
     return None   
 
 def view_req_5_part2(lista_top_of_the_world):
@@ -236,7 +232,6 @@ while True:
         view_elementos_lista_carga(propiedades[3])
         print("Ultimos 5 eventos cargados: ")
         view_elementos_lista_carga(propiedades[4])
-        model.consulta_auxiliar(catalog)
 
     elif int(inputs[0]) == 3:
         car,sup,inf = parametros_req1()
@@ -261,9 +256,10 @@ while True:
     elif int(inputs[0]) == 7:
         init, end = parametros_req5()
         result = execute_req5(catalog, init, end)
-        keys = mp.keySet(result[0])
-        view_req_5_part1(keys, result[0])
-        #view_req_5_part2(result[1])
+        print('\nRESULTADOS ENCONTRADOS')
+        print(f'\nReproducciones encontradas en el rango de horas dado: {result[2]}')
+        view_req_5_part1(result[0])
+        view_req_5_part2(result[1])
 
     elif int(inputs[0]) == 70:
         result = execute_consulta_propiedades(catalog)
